@@ -1,10 +1,10 @@
 {
-  "name": "hello_world",
+  "name": "salesforce",
   "version": "1.0.0",
-  "description": "hello world sample for NodeJS",
+  "description": "A function invoked by an Amazon Pinpoint Campaign or Journey that will insert a record into Salesforce",
   "main": "app.js",
-  "repository": "https://github.com/awslabs/aws-sam-cli/tree/develop/samcli/local/init/templates/cookiecutter-aws-sam-hello-nodejs",
-  "author": "SAM CLI",
+  "repository": "https://github.com/angrycider/amazon-pinpoint-custom-channels/tree/master/salesforce",
+  "author": "angrycider",
   "license": "MIT",
   "dependencies": {
     "axios": "^0.18.0"
