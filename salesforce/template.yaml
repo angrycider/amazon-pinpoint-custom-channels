@@ -3,9 +3,27 @@ Transform: AWS::Serverless-2016-10-31
 Description: Amazon Pinpoint Salesforce Channel.  This application will insert records into Salesforce.  Written in Node.
 
 Parameters:
-  SALESFORCECONSUMERKEY:
+  SFCONSUMERKEY:
     Type: String
     Description: Salesforce Consumer Key
+  SFPRIVATEKEY:
+    Type: String
+    Description: The private Key linked to the public SSL cert without the header and footer
+  SFAPIUSERNAME:
+    Type: String
+    Description: The api user used by aws to connect to sfdc
+  SFINSTANCEURL:
+    Type: String
+    Description: The account URL.  Found after logging into Salesforce
+  SFOBJECTTYPE:
+    Type: String
+    Description: The type of record to insert Lead, Contact, or CustomObject__c for a custom object that has been added to the account
+  UPDATEATTRIBUTE:
+    Type: String
+    Description: (Optional) If specified will perform an Upsert using the value in the specified attribute.  For example if the Endpoint has an attribute of `SFDC_Lead_ID` then the function will use the value of of that attribute to Update the object.  If the value is missing or blank then the function will insert a new record
+  SANDBOX:
+    Type: String
+    Description: (Optional) Set to `true` if working with Salesforce Sandbox account
 
 Resources:
   SalesforceFunction:
@@ -17,7 +35,13 @@ Resources:
       Timeout: 60
       Environment:
         Variables:
-          SALESFORCE_CONSUMER_KEY: !Ref SALESFORCECONSUMERKEY
+          SFCONSUMERKEY: !Ref SFCONSUMERKEY
+          SFPRIVATEKEY: !Ref SFPRIVATEKEY
+          SFAPIUSERNAME: !Ref SFAPIUSERNAME
+          SFINSTANCEURL: !Ref SFINSTANCEURL
+          SFOBJECTTYPE: !Ref SFOBJECTTYPE
+          UPDATEATTRIBUTE: !Ref UPDATEATTRIBUTE
+          SANDBOX: !Ref SANDBOX
 
 Outputs:
   SalesforceFunction:

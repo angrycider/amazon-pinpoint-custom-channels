@@ -1,5 +1,33 @@
 # salesforce
+The purpose of this application is to be used in integration with Amazon Pinpoint Campaigns and Journeys to insert a record into Salesforce.com.  This allows Marketers to add objects to Salesforce based on based on actions in Journeys:
+- Adding a Lead Record for users who open an email.
+- Creating a Support Case for errors that may happen in the Journey.
+- Any other record that maybe needed for the Campaign
 
+## Prerequisites
+This solution will use the [OAuth 2.0 JWT Bearer Flow for Server-to-Server Integration](https://help.salesforce.com/articleView?id=remoteaccess_oauth_jwt_flow.htm&type=5) 
+
+It will require the generation of public and private keys:
+
+```bash
+openssl req -nodes -new -x509 -keyout private.pem -out server.cert
+```
+
+- You have a `private.pem` and `server.cert` files build using the command above
+- A [connected app](https://help.salesforce.com/articleView?id=connected_app_create_api_integration.htm&type=5) has been created in your Salesforce account (a free developer account can also be used) **Note:** Make note of the Consumer Key once created as it will be needed later on.
+- A Salesforce API user account.  **Note:** This user should only have enough access to the record types to be inserted.
+- **DCL TODO: This needs more work and screenshots as this is tricky in SFDC**
+
+## Input Parameters
+- **SFCONSUMERKEY** - The Connected App Consumer Key found [here]()
+- **SFPRIVATEKEY** - The private Key linked to the public SSL cert without the header and footer
+- **SFAPIUSERNAME** - The api user used by aws to connect to sfdc
+- **SFINSTANCEURL** - The account URL.  Found after logging into Salesforce: i.e. `https://na172.lightning.force.com/`
+- **SFOBJECTTYPE** - The type of record to insert: Lead, Contact, or CustomObject__c for a custom object that has been added to the account
+- **UPDATEATTRIBUTE** - (Optional) If specified will perform an Upsert using the value in the specified attribute.  For example if the Endpoint has an attribute of `SFDC_Lead_ID` then the function will use the value of of that attribute to Update the object.  If the value is missing or blank then the function will insert a new record.
+- **SANDBOX** - (Optional) Set to `true` if working with Salesforce Sandbox account
+
+## SAM Details
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
 
 - salesforce - Code for the application's Lambda function.
@@ -56,10 +84,25 @@ The SAM CLI installs dependencies defined in `salesforce/package.json`, creates 
 
 Test a single function by invoking it directly with a test event. An event is a JSON document that represents the input that the function receives from the event source. Test events are included in the `events` folder in this project.
 
-Run functions locally and invoke them with the `sam local invoke` command.
+Run functions locally and invoke them with the `sam local invoke` command. 
 
 ```bash
-salesforce$ sam local invoke SalesforceFunction --event events/event.json
+salesforce$ sam local invoke SalesforceFunction --event events/event.json  --env-vars env.json
+```
+
+Sample `env.json`:
+```json
+{
+    "SalesforceFunction": {
+        "SFCONSUMERKEY": "Super Secret Consumer Key",
+        "SFPRIVATEKEY": "Super Secret Private Key",
+        "SFAPIUSERNAME": "",
+        "SFINSTANCEURL": "",
+        "SFOBJECTTYPE": "LEAD",
+        "UPDATEATTRIBUTE": "",
+        "SANDBOX": "false"
+    }
+}
 ```
 
 The SAM CLI can also emulate your application's API. Use the `sam local start-api` to run the API locally on port 3000.
