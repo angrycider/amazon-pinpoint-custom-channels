@@ -22,7 +22,7 @@ openssl req -nodes -new -x509 -keyout private.pem -out server.cert
 - **SFCONSUMERKEY** - The Connected App Consumer Key found [here]()
 - **SFPRIVATEKEY** - The private Key linked to the public SSL cert without the header and footer
 - **SFAPIUSERNAME** - The api user used by aws to connect to sfdc
-- **SFINSTANCEURL** - The account URL.  Found after logging into Salesforce: i.e. `https://na172.lightning.force.com/`
+- **SFLOGINURL** - The oauth login url...typically: https://login.salesforce.com
 - **SFOBJECTTYPE** - The type of record to insert: Lead, Contact, or CustomObject__c for a custom object that has been added to the account
 - **UPDATEATTRIBUTE** - (Optional) If specified will perform an Upsert using the value in the specified attribute.  For example if the Endpoint has an attribute of `SFDC_Lead_ID` then the function will use the value of of that attribute to Update the object.  If the value is missing or blank then the function will insert a new record.
 - **SANDBOX** - (Optional) Set to `true` if working with Salesforce Sandbox account

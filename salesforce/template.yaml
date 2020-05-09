@@ -12,9 +12,9 @@ Parameters:
   SFAPIUSERNAME:
     Type: String
     Description: The api user used by aws to connect to sfdc
-  SFINSTANCEURL:
+  SFLOGINURL:
     Type: String
-    Description: The account URL.  Found after logging into Salesforce
+    Description: The oauth login url
   SFOBJECTTYPE:
     Type: String
     Description: The type of record to insert Lead, Contact, or CustomObject__c for a custom object that has been added to the account
@@ -38,7 +38,7 @@ Resources:
           SFCONSUMERKEY: !Ref SFCONSUMERKEY
           SFPRIVATEKEY: !Ref SFPRIVATEKEY
           SFAPIUSERNAME: !Ref SFAPIUSERNAME
-          SFINSTANCEURL: !Ref SFINSTANCEURL
+          SFLOGINURL: !Ref SFLOGINURL
           SFOBJECTTYPE: !Ref SFOBJECTTYPE
           UPDATEATTRIBUTE: !Ref UPDATEATTRIBUTE
           SANDBOX: !Ref SANDBOX
