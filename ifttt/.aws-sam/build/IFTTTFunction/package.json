@@ -1,0 +1,19 @@
+{
+  "name": "ifttt",
+  "version": "1.0.0",
+  "description": "A function invoked by an Amazon Pinpoint Campaign or Journey that will make a POST to IFTTT webhook",
+  "main": "app.js",
+  "repository": "https://github.com/angrycider/amazon-pinpoint-custom-channels/tree/master/ifttt",
+  "author": "angrycider",
+  "license": "MIT",
+  "dependencies": {
+    "axios": "^0.18.0"
+  },
+  "scripts": {
+    "test": "mocha tests/unit/"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "mocha": "^6.1.4"
+  }
+}
