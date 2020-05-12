@@ -21,9 +21,6 @@ Parameters:
   UPDATEATTRIBUTE:
     Type: String
     Description: (Optional) If specified will perform an Upsert using the value in the specified attribute.  For example if the Endpoint has an attribute of `SFDC_Lead_ID` then the function will use the value of of that attribute to Update the object.  If the value is missing or blank then the function will insert a new record
-  SANDBOX:
-    Type: String
-    Description: (Optional) Set to `true` if working with Salesforce Sandbox account
 
 Resources:
   SalesforceFunction:
@@ -47,7 +44,6 @@ Resources:
           SFLOGINURL: !Ref SFLOGINURL
           SFOBJECTTYPE: !Ref SFOBJECTTYPE
           UPDATEATTRIBUTE: !Ref UPDATEATTRIBUTE
-          SANDBOX: !Ref SANDBOX
   
   PinpointInvokePermission:
     Type: AWS::Lambda::Permission

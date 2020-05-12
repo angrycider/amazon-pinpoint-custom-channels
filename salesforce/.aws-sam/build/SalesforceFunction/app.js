@@ -44,7 +44,7 @@ function buildSFObjectFromEndpoint(endpoint){
 }
 
 function processInserts(conn, campaignID, sfObject, endpoints, pinpointEvents){
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         try{
             var endpointsToInsert = [];
             var updateAttribute = process.env.UPDATEATTRIBUTE;
@@ -60,7 +60,7 @@ function processInserts(conn, campaignID, sfObject, endpoints, pinpointEvents){
                         pinpointEvents[endpoint.ID] = createPinpointEvent(endpointID, campaignID, sfObject, "insert")
                     }
                 } 
-            })
+            }) 
             
             if(endpointsToInsert.length === 1){
                 //Just a single record to insert, so make single API call
@@ -121,7 +121,7 @@ function processUpdates(conn, campaignID, sfObject, endpoints, pinpointEvents){
 
                 if (updateAttribute){
                     if (endpoint.Attributes[updateAttribute] && endpoint.Attributes[updateAttribute][0]) {
-                        tempObject = buildSFObjectFromEndpoint(endpoint);
+                        var tempObject = buildSFObjectFromEndpoint(endpoint);
                         tempObject.Id = endpoint.Attributes[updateAttribute][0];
                         endpointsToUpdate.push(tempObject);
 
@@ -149,7 +149,7 @@ function processUpdates(conn, campaignID, sfObject, endpoints, pinpointEvents){
                 
                 console.log("Found Multiple Objects to Update");
 
-                conn.bulk.load(sfObject, "update", endpointstoUpdate, function(err, rets) {
+                conn.bulk.load(sfObject, "update", endpointsToUpdate, function(err, rets) {
                     if (err) { 
                         console.error(err); 
                     } else {
@@ -204,7 +204,7 @@ function processEvents(applicationId, events){
             }
         };
 
-        pinpoint.putEvents(params, function(err, data) {
+        pinpoint.putEvents(params, function(err) {
             if (err) {
                 console.log(err, err.stack); 
                 resolve(); //Just going to log and return
@@ -241,10 +241,10 @@ function addSFObjects(event){
                 var pinpointEvents = {};
 
                 processInserts(conn, campaignID, sfObject, event.Endpoints, pinpointEvents)
-                .then(function(insertEvents){
+                .then(function(){
                     return processUpdates(conn, campaignID, sfObject, event.Endpoints, pinpointEvents)
                 })
-                .then(function(updateEvents){
+                .then(function(){
                     return processEvents(event['ApplicationId'], pinpointEvents)
                 })
                 .then(function(){
@@ -266,10 +266,10 @@ function addSFObjects(event){
     });
 }
 
-exports.handler = async (event, context) => {
+exports.handler = async (event) => {
     
     console.log(JSON.stringify(event));
-    body = await addSFObjects(event);
+    var body = await addSFObjects(event);
 
     response = {
         'statusCode': 200,

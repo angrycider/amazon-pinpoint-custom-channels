@@ -10,7 +10,7 @@ This solution will use the [OAuth 2.0 JWT Bearer Flow for Server-to-Server Integ
 It will require the generation of public and private keys:
 
 ```bash
-openssl req -nodes -new -x509 -keyout private.pem -out server.cert
+openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
 ```
 
 - You have a `private.pem` and `server.cert` files build using the command above
@@ -20,12 +20,11 @@ openssl req -nodes -new -x509 -keyout private.pem -out server.cert
 
 ## Input Parameters
 - **SFCONSUMERKEY** - The Connected App Consumer Key found [here]()
-- **SFPRIVATEKEY** - The private Key linked to the public SSL cert without the header and footer
+- **SFPRIVATEKEY** - The private Key linked to the public SSL cert without the header and footer (key.pem from the command above)
 - **SFAPIUSERNAME** - The api user used by aws to connect to sfdc
-- **SFLOGINURL** - The oauth login url...typically: https://login.salesforce.com
+- **SFLOGINURL** - The oauth login url...typically: https://login.salesforce.com or https://test.salesforce.com for sandbox.
 - **SFOBJECTTYPE** - The type of record to insert: Lead, Contact, or CustomObject__c for a custom object that has been added to the account
 - **UPDATEATTRIBUTE** - (Optional) If specified will perform an Upsert using the value in the specified attribute.  For example if the Endpoint has an attribute of `SFDC_Lead_ID` then the function will use the value of of that attribute to Update the object.  If the value is missing or blank then the function will insert a new record.
-- **SANDBOX** - (Optional) Set to `true` if working with Salesforce Sandbox account
 
 ## SAM Details
 This project contains source code and supporting files for a serverless application that you can deploy with the SAM CLI. It includes the following files and folders.
