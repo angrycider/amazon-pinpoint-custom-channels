@@ -5,6 +5,8 @@ let moment = require('moment');
 let jwt = require('jsonwebtoken');
 let url = require('url');
 let querystring = require('querystring');
+let AWS = require('aws-sdk');
+let pinpoint = new AWS.Pinpoint();
 
 
 function generateSFJWT(){
@@ -43,187 +45,178 @@ function buildSFObjectFromEndpoint(endpoint){
 
 function processInserts(conn, campaignID, sfObject, endpoints, pinpointEvents){
     return new Promise((resolve) => {
-        var endpointsToInsert = [];
-        var events = {};
-        var updateAttribute = process.env.UPDATEATTRIBUTE;
+        try{
+            var endpointsToInsert = [];
+            var updateAttribute = process.env.UPDATEATTRIBUTE;
 
-        Object.keys(endpoints).forEach(function (endpointID) {
-            var endpoint = endpoints[endpointID]
-            endpoint.ID = endpointID
+            Object.keys(endpoints).forEach(function (endpointID) {
+                var endpoint = endpoints[endpointID]
+                endpoint.ID = endpointID
 
-            if (updateAttribute){
-                if (!endpoint.Attributes[updateAttribute][0]) {
-                    //endpoint has an update field, but it's empty, so perform an insert.
-                    endpointsToInsert.push(buildSFObjectFromEndpoint(endpoint));
-                }
-            } else {
-                //custom channel not configured to do updates, so insert
-                endpointsToInsert.push(buildSFObjectFromEndpoint(endpoint));
-            }
-        })
-        
-
-        if(endpointsToInsert.length === 1){
-            //Just a single record to insert, so make single API call
-            console.log("Found Single Object to Insert:");
-
-            conn.sobject(sfObject).create(endpointsToInsert[0], function(err, ret) {
-
-                console.log(JSON.stringify(ret))
-                if (err || !ret.success) { 
-                    console.error(err, ret); 
-                    //pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "insert", err);
-                } else {
-                    console.log("Created record id : " + ret.id);
-                    //pinpointEvents[endpoint.ID] = createSuccessEvent(endpoint.ID, campaignID, sfObject, "insert", ret.id)
-                }
-                resolve(events)
-            });
-        } else if (endpointsToInsert.length > 1){
-            //Multiple records to insert, so make use of bulk api to optimize API call limits.
+                if (updateAttribute){
+                    if (!updateAttribute || !endpoint.Attributes[updateAttribute][0]) {
+                        //endpoint has an update field, but it's empty, so perform an insert.
+                        endpointsToInsert.push(buildSFObjectFromEndpoint(endpoint));
+                        pinpointEvents[endpoint.ID] = createPinpointEvent(endpointID, campaignID, sfObject, "insert")
+                    }
+                } 
+            })
             
-            console.log("Found Multiple Objects to Insert");
+            if(endpointsToInsert.length === 1){
+                //Just a single record to insert, so make single API call
+                console.log("Found Single Object to Insert:");
 
-            conn.bulk.load(sfObject, "insert", endpointsToInsert, function(err, rets) {
-                if (err) { 
-                     //console.error(err); 
-                     //pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "insert", err);
-                } else {
-                    for (var i=0; i < rets.length; i++) {
-                        console.log(JSON.stringify(rets[i]))
-                        if (rets[i].success) {
-                            console.log("#" + (i+1) + " inserted successfully, id = " + rets[i].id);
-                            //pinpointEvents[endpoint.ID] = createSuccessEvent(endpoint.ID, campaignID, sfObject, "insert", ret.id)
-                        } else {
-                            console.log("#" + (i+1) + " insert error occurred, message = " + rets[i].errors.join(', '));
-                           // pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "insert", rets[i].errors.join(', '));
+                conn.sobject(sfObject).create(endpointsToInsert[0], function(err, ret) {
+
+                    console.log(JSON.stringify(ret))
+                    if (err || !ret.success) { 
+                        console.error(err, ret); 
+                    } else {
+                        console.log("Created record id : " + ret.id);
+                    }
+                    resolve()
+                });
+            } else if (endpointsToInsert.length > 1){
+                //Multiple records to insert, so make use of bulk api to optimize API call limits.
+                
+                console.log("Found Multiple Objects to Insert");
+
+                conn.bulk.load(sfObject, "insert", endpointsToInsert, function(err, rets) {
+                    if (err) { 
+                        //console.error(err); 
+                        //pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "insert", err);
+                    } else {
+                        for (var i=0; i < rets.length; i++) {
+                            console.log(JSON.stringify(rets[i]))
+                            if (rets[i].success) {
+                                console.log("#" + (i+1) + " inserted successfully, id = " + rets[i].id);
+                            } else {
+                                console.log("#" + (i+1) + " insert error occurred, message = " + rets[i].errors.join(', '));
+                            }
                         }
                     }
-                }
-                resolve(events)
-            });
+                    resolve()
+                });
 
-        } else {
-            resolve(events)
+            } else {
+                //nothing to process...just return
+                resolve()
+            }
         }
-        
+        catch(ex){
+            reject(ex)
+        }
     });
 }
 
 function processUpdates(conn, campaignID, sfObject, endpoints, pinpointEvents){
-    return new Promise((resolve) => {
-        var endpointsToUpdate = [];
-        var events = {};
-        var updateAttribute = process.env.UPDATEATTRIBUTE;
+    return new Promise((resolve, reject) => {
+        try{
+            var endpointsToUpdate = [];
+            var updateAttribute = process.env.UPDATEATTRIBUTE;
 
-        Object.keys(endpoints).forEach(function (endpointID) {
-            var endpoint = endpoints[endpointID]
-            endpoint.ID = endpointID
+            Object.keys(endpoints).forEach(function (endpointID) {
+                var endpoint = endpoints[endpointID]
+                endpoint.ID = endpointID
 
-            if (updateAttribute){
-                if (endpoint.Attributes[updateAttribute] && endpoint.Attributes[updateAttribute][0]) {
-                    tempObject = buildSFObjectFromEndpoint(endpoint);
-                    tempObject.Id = endpoint.Attributes[updateAttribute][0];
-                    endpointsToUpdate.push(tempObject);
-                }
-            } 
-        })
-        
+                if (updateAttribute){
+                    if (endpoint.Attributes[updateAttribute] && endpoint.Attributes[updateAttribute][0]) {
+                        tempObject = buildSFObjectFromEndpoint(endpoint);
+                        tempObject.Id = endpoint.Attributes[updateAttribute][0];
+                        endpointsToUpdate.push(tempObject);
 
-        if(endpointsToUpdate.length === 1){
-            //Just a single record to update, so make single API call
-            console.log("Found Single Object to Update:");
+                        pinpointEvents[endpoint.ID] = createPinpointEvent(endpointID, campaignID, sfObject, "update")
+                    }
+                } 
+            })
 
-            conn.sobject(sfObject).update(endpointsToUpdate[0], function(err, ret) {
+            if(endpointsToUpdate.length === 1){
+                //Just a single record to update, so make single API call
+                console.log("Found Single Object to Update:");
 
-                console.log(JSON.stringify(ret))
-                if (err || !ret.success) { 
-                    console.error(err, ret); 
-                    //pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "update", err)
-                } else {
-                    console.log("Updated record id : " + ret.id);
-                    //pinpointEvents[endpoint.ID] = createSuccessEvent(endpoint.ID, campaignID, sfObject, "update", ret.id)
-                }
-                resolve(events)
-            });
-        } else if (endpointsToUpdate.length > 1){
-            //Multiple records to update, so make use of bulk api to optimize API call limits.
-            
-            console.log("Found Multiple Objects to Update");
+                conn.sobject(sfObject).update(endpointsToUpdate[0], function(err, ret) {
 
-            conn.bulk.load(sfObject, "update", endpointstoUpdate, function(err, rets) {
-                if (err) { 
-                     console.error(err); 
-                     //pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "update", err)
-                } else {
-                    for (var i=0; i < rets.length; i++) {
+                    console.log(JSON.stringify(ret))
+                    if (err || !ret.success) { 
+                        console.error(err, ret); 
+                    } else {
+                        console.log("Updated record id : " + ret.id);
+                    }
+                    resolve()
+                });
+            } else if (endpointsToUpdate.length > 1){
+                //Multiple records to update, so make use of bulk api to optimize API call limits.
+                
+                console.log("Found Multiple Objects to Update");
 
-                        console.log(JSON.stringify(rets[i]))
-                        if (rets[i].success) {
-                            console.log("#" + (i+1) + " updated successfully, id = " + rets[i].id);
-                            //pinpointEvents[endpoint.ID] = createSuccessEvent(endpoint.ID, campaignID, sfObject, "update", ret.id)
-                        } else {
-                            console.log("#" + (i+1) + " update error occurred, message = " + rets[i].errors.join(', '));
-                            //pinpointEvents[endpoint.ID] = createFailureEvent(endpoint.ID, campaignID, sfObject, "update", rets[i].errors.join(', '));
+                conn.bulk.load(sfObject, "update", endpointstoUpdate, function(err, rets) {
+                    if (err) { 
+                        console.error(err); 
+                    } else {
+                        for (var i=0; i < rets.length; i++) {
+
+                            console.log(JSON.stringify(rets[i]))
+                            if (rets[i].success) {
+                                console.log("#" + (i+1) + " updated successfully, id = " + rets[i].id);
+                            } else {
+                                console.log("#" + (i+1) + " update error occurred, message = " + rets[i].errors.join(', '));
+                            }
                         }
                     }
-                }
-                resolve(events)
-            });
+                    resolve()
+                });
 
-        } else {
-            resolve(events)
+            } else {
+                //Nothing to process...just return
+                resolve()
+            }
+        }
+        catch(ex){
+            reject(ex)
         }
     });
 }
 
-function createSuccessEvent(endpointID, campaignID, objectType, action, objectID){
+function createPinpointEvent(endpointID, campaignID, objectType, action){
     var customEvent = {
         'Endpoint': {},
         'Events': {}
     };
 
     customEvent['Events'][`salesforce_${endpointID}_${campaignID}`] = {
-        'EventType': 'salesforce.success',
+        'EventType': 'salesforce.push',
         'Timestamp': moment().toISOString(),
         'Attributes': {
             'campaignID': campaignID,
             'objectType': objectType,
-            'action': action,
-            'objectID': objectID
+            'action': action
         }
     };
     return customEvent;
 }
 
-function createFailureEvent(endpointID, campaignID, objectType, action, err){
-    var customEvent = {
-        'Endpoint': {},
-        'Events': {}
-    };
-
-    customEvent['Events'][`salesforce_${endpointID}_${campaignID}`] = {
-        'EventType': 'salesforce.failure',
-        'Timestamp': moment().toISOString(),
-        'Attributes': {
-            'campaignID': campaign_id,
-            'objectType': objectType,
-            'action': action,
-            'error': JSON.stringify(err)
-        }
-    };
-    return customEvent;
-}
-
-function processEvents(events){
+function processEvents(applicationId, events){
     return new Promise((resolve) => {
-        console.log(events);
-        resolve({});
+        var params = {
+            ApplicationId: applicationId,
+            EventsRequest: {
+                BatchItem: events
+            }
+        };
+
+        pinpoint.putEvents(params, function(err, data) {
+            if (err) {
+                console.log(err, err.stack); 
+                resolve(); //Just going to log and return
+            } else {
+                resolve();
+            }
+          });
     });
 }
 
 function addSFObjects(event){
-    return new Promise((resolve) => {
+    return new Promise((resolve, reject) => {
         try {
 
             if (event.Endpoints.length === 0) {
@@ -252,24 +245,23 @@ function addSFObjects(event){
                     return processUpdates(conn, campaignID, sfObject, event.Endpoints, pinpointEvents)
                 })
                 .then(function(updateEvents){
-                    return processEvents(pinpointEvents)
+                    return processEvents(event['ApplicationId'], pinpointEvents)
                 })
                 .then(function(){
                     resolve({"message":"success"}) //TODO: update with events
                 })
                 .catch(function(err){
-                    console.error(err);
-                    resolve({"message":"error"})
+                    console.error(`unhandled exception updating salesforce: ${JSON.stringify(err)}`);
+                    reject({"message":`unhandled exception: ${err}`})
                 })
             })
             .catch(function(err){
-                console.log(err);
-                //throw new Error(`error getting token: ${err}`)
-                resolve({"message":`error getting token: ${err}`})
+                console.error(`error getting token: ${JSON.stringify(err)}`);
+                reject({"message":`error getting token: ${err}`})
             });
         } catch (err) {
-            //throw new Error(`unknown error: ${err}`)
-            resolve({"message":`unknown error: ${err}`})
+            console.error(`unknown error: ${JSON.stringify(err)}`)
+            reject({"message":`unknown error: ${JSON.stringify(err)}`})
         }
     });
 }
