@@ -34,6 +34,7 @@ function generateSFJWT(){
 function buildSFObjectFromEndpoint(endpoint){
     //Customize this method as needed to update the SF object based on your enpoint Attributes.
     //The following are the bare minimum fields for a Lead Object
+    console.info(JSON.stringify(endpoint))
     return {
         FirstName:endpoint.Attributes.FirstName[0],
         LastName:endpoint.Attributes.LastName[0],
