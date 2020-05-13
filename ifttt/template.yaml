@@ -18,6 +18,14 @@ Resources:
       Environment:
         Variables:
           IFTTTWEBHOOKURL: !Ref IFTTTWEBHOOKURL
+  
+  PinpointInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref IFTTTFunction
+      Principal: !Sub pinpoint.${AWS::Region}.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:apps/*
 
 Outputs:
   IFTTTFunction:
