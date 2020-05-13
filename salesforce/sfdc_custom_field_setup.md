@@ -15,18 +15,18 @@ https://help.salesforce.com/articleView?id=adding_fields.htm&type=5
 
 - [ ] Create a new Custom field on the Lead Object **NOTE: we are using the Lead Object, but you can use whatever object you want...even custom objects.**
 
-![SFDC Connected App](images/custom_field_1)
+![SFDC Custom Field](images/custom_field_1.png)
 
-![SFDC Connected App](images/custom_field_2)
+![SFDC Custom Field](images/custom_field_2.png)
 
-![SFDC Connected App](images/custom_field_3)
+![SFDC Custom Field](images/custom_field_3.png)
 
-![SFDC Connected App](images/custom_field_4)
+![SFDC Custom Field](images/custom_field_4.png)
 
-![SFDC Connected App](images/custom_field_5)
+![SFDC Custom Field](images/custom_field_5.png)
 
-![SFDC Connected App](images/custom_field_6)
+![SFDC Custom Field](images/custom_field_6.png)
 
-![SFDC Connected App](images/custom_field_7)
+![SFDC Custom Field](images/custom_field_7.png)
 
-![SFDC Connected App](images/custom_field_8)
+![SFDC Custom Field](images/custom_field_8.png)
