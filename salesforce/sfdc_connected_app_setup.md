@@ -17,13 +17,19 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 - [ ] Switch to **Setup**
 
 ![SFDC Setup](images/setup_1.png)
+
+
 - [ ] Create a new Connected App **Setup**
 
 ![SFDC Connected App](images/setup_2.png)
+
+
 - [ ] Create a new Connected App **Setup**
 
 ![SFDC Connected App Setup 1](images/setup_3.png)
 ![SFDC Connected App Setup 2](images/setup_4.png)
+
+
 
 - [ ] Manage the connected app and define the appropriate User Profile **NOTE: for demo purposes we are Assigning System Administrator Profile.  You will want to assign a Profile that has the least amount of permissions needed by your Lambda function**  [More Information on Salesforce Profiles](https://help.salesforce.com/articleView?id=admin_userprofiles.htm&type=5)
 
@@ -33,10 +39,14 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 ![SFDC Profile Setup 4](images/setup_9.png)
 ![SFDC Profile Setup 5](images/setup_10.png)
 
+
+
 - [ ] Make note of the **Consumer Key** and **Consumer Secret** as they will be needed in future steps.
 
 ![SFDC Consumer Key 1](images/setup_11.png)
 ![SFDC Consumer Key 2](images/setup_12.png)
+
+
 
 - [ ] Perform an initial OAuth login using the **Consumer Key** noted above.  **NOTE: this is a one time step needed to complete the OAuth flow preventing any need for user interaction in the future.**  If using a sandbox account you will want to change the url to `test.salesforce.com`
 
