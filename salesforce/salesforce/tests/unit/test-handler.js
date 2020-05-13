@@ -5,7 +5,7 @@ const chai = require('chai')
 const expect = chai.expect
 var event, context
 
-describe ('Tests index', function () {
+describe('Tests index', function () {
   it ('verifies successful response', async () => {
     const result = await app.handler(event, context)
 
@@ -16,7 +16,5 @@ describe ('Tests index', function () {
     const response = JSON.parse(result.body)
 
     expect(response).to.be.an('object')
-    // expect(response.message).to.be.equal("hello world")
-    // expect(response.location).to.be.an("string")
   })
 })
