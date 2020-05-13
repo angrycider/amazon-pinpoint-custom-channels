@@ -15,4 +15,5 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 
 1. Login to your Salesforce Account.  A free developer account works as well.
 2. Switch to **Setup**
+
 ![SFDC Setup](images/setup_1.png)
