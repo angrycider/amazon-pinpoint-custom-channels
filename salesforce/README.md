@@ -2,21 +2,13 @@
 The purpose of this application is to be used in integration with Amazon Pinpoint Campaigns and Journeys to insert a record into Salesforce.com.  This allows Marketers to add objects to Salesforce based on based on actions in Journeys:
 - Adding a Lead Record for users who open an email.
 - Creating a Support Case for errors that may happen in the Journey.
-- Any other record that maybe needed for the Campaign
+- Any other record that maybe needed for a particular Campaign
 
 ## Prerequisites
 This solution will use the [OAuth 2.0 JWT Bearer Flow for Server-to-Server Integration](https://help.salesforce.com/articleView?id=remoteaccess_oauth_jwt_flow.htm&type=5) 
 
-It will require the generation of public and private keys:
-
-```bash
-openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
-```
-
-- You have a `private.pem` and `server.cert` files build using the command above
-- A [connected app](https://help.salesforce.com/articleView?id=connected_app_create_api_integration.htm&type=5) has been created in your Salesforce account (a free developer account can also be used) **Note:** Make note of the Consumer Key once created as it will be needed later on.
-- A Salesforce API user account.  **Note:** This user should only have enough access to the record types to be inserted.
-- **DCL TODO: This needs more work and screenshots as this is tricky in SFDC**
+- You will need a Salesforce account.  A free [Developer Account](https://developer.salesforce.com) works great with this example.
+- See [Salesforce Connected App Setup Guide](sfdc_connected_app_setup.md) for more details.
 
 ## Input Parameters
 - **SFCONSUMERKEY** - The Connected App Consumer Key found [here]()
