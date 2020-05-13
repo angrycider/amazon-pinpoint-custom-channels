@@ -1,9 +1,11 @@
 {
     "env": {
         "es6": true,
-        "node": true
+        "node": true,
+        "mocha": true,
+        "chai": true
     },
-    "extends": "eslint:recommended",
+    "extends": "standard",
     "globals": {
         "Atomics": "readonly",
         "SharedArrayBuffer": "readonly"
@@ -12,5 +14,7 @@
         "ecmaVersion": 11
     },
     "rules": {
+        "no-unused-vars": "warn",
+        "prefer-promise-reject-errors": "off"
     }
 }
