@@ -90,8 +90,7 @@ Sample `env.json`:
         "SFAPIUSERNAME": "",
         "SFINSTANCEURL": "",
         "SFOBJECTTYPE": "LEAD",
-        "UPDATEATTRIBUTE": "",
-        "SANDBOX": "false"
+        "UPDATEATTRIBUTE": ""
     }
 }
 ```

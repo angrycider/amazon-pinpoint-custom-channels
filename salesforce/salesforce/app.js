@@ -31,13 +31,14 @@ function generateSFJWT () {
   return token
 }
 
-function buildSFObjectFromEndpoint (endpoint) {
+function buildSFObjectFromEndpoint (endpointId, endpoint) {
   // Customize this method as needed to update the SF object based on your enpoint Attributes.
   // The following are the bare minimum fields for a Lead Object
   return {
     FirstName: endpoint.Attributes.FirstName[0],
     LastName: endpoint.Attributes.LastName[0],
-    Company: endpoint.Attributes.Company[0]
+    Company: endpoint.Attributes.Company[0],
+    Pinpoint_Endpoint_ID__c: endpointId //requires adding "Pinpoint Endpoint ID" as a Custom field on the Lead Record
   }
 }
 
@@ -49,13 +50,12 @@ function processInserts (conn, campaignID, sfObject, endpoints, pinpointEvents) 
 
       Object.keys(endpoints).forEach(function (endpointID) {
         var endpoint = endpoints[endpointID]
-        endpoint.ID = endpointID
 
         if (updateAttribute) {
           if (!updateAttribute || !endpoint.Attributes[updateAttribute][0]) {
             // endpoint has an update field, but it's empty, so perform an insert.
-            endpointsToInsert.push(buildSFObjectFromEndpoint(endpoint))
-            pinpointEvents[endpoint.ID] = createPinpointEvent(endpointID, campaignID, sfObject, 'insert')
+            endpointsToInsert.push(buildSFObjectFromEndpoint(endpointID, endpoint))
+            pinpointEvents[endpointID] = createPinpointEvent(endpointID, campaignID, sfObject, 'insert')
           }
         }
       })
@@ -112,15 +112,14 @@ function processUpdates (conn, campaignID, sfObject, endpoints, pinpointEvents) 
 
       Object.keys(endpoints).forEach(function (endpointID) {
         var endpoint = endpoints[endpointID]
-        endpoint.ID = endpointID
 
         if (updateAttribute) {
           if (endpoint.Attributes[updateAttribute] && endpoint.Attributes[updateAttribute][0]) {
-            var tempObject = buildSFObjectFromEndpoint(endpoint)
+            var tempObject = buildSFObjectFromEndpoint(endpointID, endpoint)
             tempObject.Id = endpoint.Attributes[updateAttribute][0]
             endpointsToUpdate.push(tempObject)
 
-            pinpointEvents[endpoint.ID] = createPinpointEvent(endpointID, campaignID, sfObject, 'update')
+            pinpointEvents[endpointID] = createPinpointEvent(endpointID, campaignID, sfObject, 'update')
           }
         }
       })

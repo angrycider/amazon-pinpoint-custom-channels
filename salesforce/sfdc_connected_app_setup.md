@@ -15,11 +15,12 @@ openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certifi
 
 https://help.salesforce.com/articleView?id=connected_app_create_api_integration.htm&type=5
 
-- [ ] Login to your Salesforce Account.  A free developer account works as well.
+- [ ] Login to your Salesforce Account.  A free [developer account](https://developer.salesforce.com) works as well.
 - [ ] Switch to **Setup**
 
 ![SFDC Setup](images/setup_1.png)
 
+- [ ] Create a new [Custom Field on the Lead Object](sfdc_custom_field_setup.md)
 
 - [ ] Create a new Connected App **Setup**
 
@@ -29,6 +30,7 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 - [ ] Create a new Connected App **Setup**
 
 ![SFDC Connected App Setup 1](images/setup_3.png)
+
 ![SFDC Connected App Setup 2](images/setup_4.png)
 
 
@@ -36,10 +38,15 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 - [ ] Manage the connected app and define the appropriate User Profile **NOTE: for demo purposes we are Assigning System Administrator Profile.  You will want to assign a Profile that has the least amount of permissions needed by your Lambda function**  [More Information on Salesforce Profiles](https://help.salesforce.com/articleView?id=admin_userprofiles.htm&type=5)
 
 ![SFDC Profile Setup 1](images/setup_6.png)
+
 ![SFDC Profile Setup 2](images/setup_7.png)
+
 ![SFDC Profile Setup 3](images/setup_8.png)
+
 ![SFDC Profile Setup 4](images/setup_9.png)
+
 ![SFDC Profile Setup 5](images/setup_10.png)
+
 
 
 
@@ -48,6 +55,7 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 **NOTE: Please treate your Consumer Key and Secret as you would a password, making sure they are protected and NOT added to any source control system**
 
 ![SFDC Consumer Key 1](images/setup_11.png)
+
 ![SFDC Consumer Key 2](images/setup_12.png)
 
 
