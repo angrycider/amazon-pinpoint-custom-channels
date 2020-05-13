@@ -9,6 +9,8 @@ Use `openssl` to generate keys:
 openssl req -newkey rsa:2048 -nodes -keyout key.pem -x509 -days 365 -out certificate.pem
 ```
 
+**NOTE: this will generate `key.pem` and `certificate.pem` files.  Please treate these files as you would a password, making sure they are protected and not added to any source control system**
+
 ## Salesforce Connected App
 
 https://help.salesforce.com/articleView?id=connected_app_create_api_integration.htm&type=5
@@ -42,6 +44,8 @@ https://help.salesforce.com/articleView?id=connected_app_create_api_integration.
 
 
 - [ ] Make note of the **Consumer Key** and **Consumer Secret** as they will be needed in future steps.
+
+**NOTE: Please treate your Consumer Key and Secret as you would a password, making sure they are protected and NOT added to any source control system**
 
 ![SFDC Consumer Key 1](images/setup_11.png)
 ![SFDC Consumer Key 2](images/setup_12.png)
