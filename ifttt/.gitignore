@@ -130,3 +130,7 @@ $RECYCLE.BIN/
 
 env.json
 samconfig.toml
+
+# Build folder
+
+*/build/*

@@ -150,3 +150,8 @@ Temporary Items
 # End of https://www.gitignore.io/api/osx,node,visualstudiocode
 
 env.json
+samconfig.toml
+
+# Build folder
+
+*/build/*
