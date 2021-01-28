@@ -2,7 +2,7 @@
 This is still a work in process, but it does work.
 
 ## Architecture
-[TODO]
+![architecture](architecture.png)
 
 ## Overview
 - **custom-channel** - This is the [custom channel](https://docs.aws.amazon.com/pinpoint/latest/developerguide/channels-custom.html) that Pinpoint will call.  This will write messages to an SQS queue for the queue processor below. Requires the following Environment variables: PHAXIO_SQS_QUEUE_URL, S3_BUCKET
