@@ -1,0 +1,127 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: Amazon Pinpoint Phaxio Channel.  This application will send fax messages via Phaxio when triggered by Amazon Pinpoint.  Written in Node.js
+Transform: AWS::Serverless-2016-10-31
+
+Parameters:
+  PHAXIOKEY:
+    Type: String
+    Description: "REQUIRED: Phaxio API Key from Phaxio Developer API Page (Use the test keys for development as they don't incur charges)."
+  PHAXIOSECRET:
+    Type: String
+    Description: "REQUIRED: Phaxio API Secret from Phaxio Developer API Page (Use the test keys for development as they don't incur charges)."
+  WEBHOOKTOKEN:
+    Type: String
+    Description: "REQUIRED: Phaxio Webhook secret from Phaxio Developer API Page. This is used to verify signed messages from Phaxio"
+  APPBUCKETNAME:
+    Type: String
+    Description: "REQUIRED: Unique S3 bucket name to use to store PDF files to be faxed by Phaxio"
+
+Resources:
+
+  AppBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: !Ref APPBUCKETNAME
+
+  PhaxioSQSQueue:
+    Type: AWS::SQS::Queue
+    Properties:
+      VisibilityTimeout: 100
+      FifoQueue: true
+
+  PinpointPhaxioQueueProcessorFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AmazonPinpointPhaxioQueueProcessor
+      CodeUri: phaxio-queue-processor/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Timeout: 60
+      ReservedConcurrentExecutions: 5
+      Events:
+        PhaxioSQSQueueEvent:
+          Type: SQS
+          Properties:
+            Queue: !GetAtt PhaxioSQSQueue.Arn
+            BatchSize: 10
+      Environment:
+        Variables:
+          PHAXIOKEY: !Ref PHAXIOKEY
+          PHAXIOSECRET: !Ref PHAXIOSECRET
+      Policies:
+      - Statement:
+        - Sid: ReadS3
+          Effect: Allow
+          Action: s3:GetObject
+          Resource: !Sub "arn:aws:s3:::${AppBucket}/*"
+        - Sid: PinpointPutEvents
+          Effect: Allow
+          Action: mobiletargeting:PutEvents
+          Resource: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:*
+
+
+
+  PinpointPhaxioCustomChannelFunction:
+    Type: AWS::Serverless::Function
+    Properties:
+      FunctionName: AmazonPinpointPhaxioChannel
+      CodeUri: phaxio-custom-pinpoint-channel/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Timeout: 60
+      Environment:
+        Variables:
+          PHAXIO_SQS_QUEUE_URL: !Ref PhaxioSQSQueue
+          S3_BUCKET: !Ref AppBucket
+      Policies:
+      - Statement:
+        - Sid: WriteS3
+          Effect: Allow
+          Action: s3:PutObject
+          Resource: !Sub "arn:aws:s3:::${AppBucket}/*"
+        - Sid: WriteSQS
+          Effect: Allow
+          Action: sqs:SendMessage
+          Resource: !GetAtt PhaxioSQSQueue.Arn
+        - Sid: PinpointPutEvents
+          Effect: Allow
+          Action: mobiletargeting:PutEvents
+          Resource: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:*
+
+  PinpointInvokePermission:
+    Type: AWS::Lambda::Permission
+    Properties:
+      Action: lambda:InvokeFunction
+      FunctionName: !Ref PinpointPhaxioCustomChannelFunction
+      Principal: !Sub pinpoint.${AWS::Region}.amazonaws.com
+      SourceArn: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:apps/*
+
+  PhaxioWebHookHandlerFunction:
+    Type: AWS::Serverless::Function 
+    Properties:
+      CodeUri: phaxio-webhook-handler/
+      Handler: index.handler
+      Runtime: nodejs12.x
+      Environment:
+        Variables:
+          WEBHOOK_TOKEN: !Ref WEBHOOKTOKEN
+      Events:
+        HelloWorld:
+          Type: Api 
+          Properties:
+            Path: /phaxio
+            Method: post
+      Policies:
+        - Statement:
+          - Sid: PinpointPutEvents
+            Effect: Allow
+            Action: mobiletargeting:PutEvents
+            Resource: !Sub arn:${AWS::Partition}:mobiletargeting:${AWS::Region}:${AWS::AccountId}:*
+
+Outputs:
+  PhaxioWebhookURL:
+    Description: "API Gateway endpoint URL. This is the URL to paste into Phaxio Webhook Page"
+    Value: !Sub "https://${ServerlessRestApi}.execute-api.${AWS::Region}.amazonaws.com/Prod/phaxio/"
+  PinpointPhaxioCustomChannelFunction:
+    Description: "A function invoked by an Amazon Pinpoint Campaign or Journey that will send a fax via Phaxio"
+    Value: !GetAtt PinpointPhaxioCustomChannelFunction.Arn
