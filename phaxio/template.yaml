@@ -9,6 +9,10 @@ Parameters:
   PHAXIOSECRET:
     Type: String
     Description: "REQUIRED: Phaxio API Secret from Phaxio Developer API Page (Use the test keys for development as they don't incur charges)."
+  PHAXIOTHROTTLESECONDS:
+    Type: String
+    Description: "We need to throttle calls to the Phaxio API.  This is the number of seconds to wait between API calls"
+    Default: 1
   WEBHOOKTOKEN:
     Type: String
     Description: "REQUIRED: Phaxio Webhook secret from Phaxio Developer API Page. This is used to verify signed messages from Phaxio"
@@ -48,6 +52,7 @@ Resources:
         Variables:
           PHAXIOKEY: !Ref PHAXIOKEY
           PHAXIOSECRET: !Ref PHAXIOSECRET
+          PHAXIO_THROTTLE_SECONDS: !Ref PHAXIOTHROTTLESECONDS
       Policies:
       - Statement:
         - Sid: ReadS3

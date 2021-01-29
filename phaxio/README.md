@@ -14,6 +14,7 @@ This SAM application will deploy all the resources necessary to build a Amazon P
 ## Input Parameters
 - **PHAXIOKEY** - REQUIRED: Phaxio API Key from [Phaxio Developer API Page](https://console.phaxio.com/api_credentials) (Use the test keys for development as they don't incur charges).
 - **PHAXIOSECRET** - REQUIRED: Phaxio API Secret from [Phaxio Developer API Page](https://console.phaxio.com/api_credentials) (Use the test keys for development as they don't incur charges).
+- **PHAXIOTHROTTLESECONDS** - We need to throttle calls to the Phaxio API.  This is the number of seconds to wait between API calls...defaults to 1 second.
 - **WEBHOOKTOKEN** - REQUIRED: Phaxio Webhook secret from [Phaxio Webhook Page](https://console.phaxio.com/user/callbacks/edit). This is used to verify signed messages from Phaxio
 - **APPBUCKETNAME** - REQUIRED: Unique S3 bucket name to use to store PDF files to be faxed by Phaxio
 

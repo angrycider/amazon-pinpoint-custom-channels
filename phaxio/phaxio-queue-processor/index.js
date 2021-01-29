@@ -31,7 +31,7 @@ async function sendFax(msg){
   console.log(msg);
   try {
     var params = {
-      to: msg.faxNumber, // Replace this with a number that can receive faxes.
+      to: msg.faxNumber, 
       tags: {
           applicationId: msg.applicationId,
           campaignId: msg.campaignId,
@@ -55,34 +55,13 @@ async function sendFax(msg){
       console.log('sendFax Error...');
       console.error(err)
   }
-
-  // phaxio.faxes.create({
-  //   to: '+13173739253', // Replace this with a number that can receive faxes.
-  //   file: `${__dirname}/TestFaxFromS3.pdf`,
-  //   tags: {
-  //       applicationId: "1aa20d5ade5c4699a5df45ddad370a10",
-  //       campaignId: "testcampaignid",
-  //       endpointId: "testendpointid"
-  //     }
-  //   })
-  //   .then((fax) => {
-  //     console.log(fax);
-  //     // {
-  //     //   apiKey: 'yadayada',
-  //     //   apiSecret: 'yadayada',
-  //     //   url: 'https://api.phaxio.com/v2.1',
-  //     //   success: true,
-  //     //   message: 'Fax queued for sending',
-  //     //   id: 242848324,
-  //     //   agentOptions: undefined,
-  //     //   auth: {
-  //     //     user: 'yadayada',
-  //     //     pass: 'yadayada'
-  //     //   }
-  //     // }
-  //   })
-  //   .catch((err) => { throw err; });
 }
+
+function sleep(ms) {
+  return new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+}  
 
 exports.handler = async (event) => {
   //console.log('Received event:', JSON.stringify(event, null, 2));
@@ -91,6 +70,7 @@ exports.handler = async (event) => {
       console.log('SQS message %s: %j', messageId, body);
       var msg = JSON.parse(body);
       await sendFax(msg);
+      await sleep(process.env.PHAXIO_THROTTLE_SECONDS * 1000); //Need to throttle our calls
     }
     return `Successfully processed ${event.Records.length} messages.`;
   }
