@@ -10,7 +10,7 @@
     "axios": "^0.21.2",
     "jsforce": "^1.9.3",
     "jsonwebtoken": "^8.5.1",
-    "moment": "^2.25.3"
+    "moment": "^2.29.4"
   },
   "scripts": {
     "test": "mocha tests/unit/"
