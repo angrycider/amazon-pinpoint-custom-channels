@@ -7,7 +7,7 @@
   "author": "angrycider",
   "license": "MIT",
   "dependencies": {
-    "axios": "^0.21.2",
+    "axios": "^1.6.0",
     "jsforce": "^1.11.1",
     "jsonwebtoken": "^9.0.0",
     "moment": "^2.29.4"
